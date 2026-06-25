@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Resume Screener</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: #1b3a6b;
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .navbar h1 {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .navbar span {
+      background: #008080;
+      color: white;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1b3a6b 0%, #008080 100%);
+      color: white;
+      text-align: center;
+      padding: 48px 20px 56px;
+    }
+    .hero h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 15px;
+      opacity: 0.85;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* ── MAIN CARD ── */
+    .container {
+      max-width: 860px;
+      margin: -30px auto 40px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      padding: 36px;
+    }
+
+    /* ── FORM ── */
+    .form-section { margin-bottom: 28px; }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #1b3a6b;
+      margin-bottom: 8px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 130px;
+      padding: 14px;
+      border: 2px solid #e0e6ef;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'Segoe UI', sans-serif;
+      color: #333;
+      resize: vertical;
+      transition: border 0.2s;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #008080;
+    }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      border: 2px dashed #b0c4de;
+      border-radius: 10px;
+      padding: 32px;
+      text-align: center;
+      background: #f7faff;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-zone:hover {
+      border-color: #008080;
+      background: #f0fafa;
+    }
+    .upload-zone input[type=file] {
+      display: none;
+    }
+    .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-zone p { color: #666; font-size: 14px; margin-top: 4px; }
+    .upload-zone strong { color: #1b3a6b; }
+
+    /* ── FILE LIST ── */
+    #file-list { margin-top: 12px; display: none; }
+    #file-list p {
+      font-weight: 600;
+      color: #1b3a6b;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    #file-names { list-style: none; padding: 0; }
+    #file-names li {
+      background: #f0fafa;
+      border: 1px solid #b2dfdb;
+      border-radius: 6px;
+      padding: 7px 12px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #file-names li span {
+      color: #999;
+      margin-left: auto;
+      font-size: 12px;
+    }
+
+    /* ── BUTTON ── */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1b3a6b, #008080);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 32px 0 24px;
+    }
+    .divider hr { flex: 1; border: none; border-top: 1px solid #e0e6ef; }
+    .divider span {
+      font-size: 13px;
+      color: #999;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ── RESULTS ── */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .results-header h3 { color: #1b3a6b; font-size: 18px; }
+    .results-count {
+      background: #e8f0fe;
+      color: #1b3a6b;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead tr {
+      background: #1b3a6b;
+      color: white;
+    }
+    thead th {
+      padding: 13px 16px;
+      text-align: left;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    tbody tr {
+      border-bottom: 1px solid #f0f4f8;
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: #f7faff; }
+    tbody td { padding: 13px 16px; color: #333; }
+
+    /* rank badge */
+    .rank {
+      background: #1b3a6b;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .rank-1 { background: #f59e0b; }
+    .rank-2 { background: #9ca3af; }
+    .rank-3 { background: #b45309; }
+
+    /* score bar */
+    .score-cell { display: flex; align-items: center; gap: 10px; }
+    .score-bar-bg {
+      flex: 1;
+      height: 8px;
+      background: #e0e6ef;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .score-bar { height: 100%; border-radius: 99px; }
+    .score-val { font-weight: 700; min-width: 42px; text-align: right; }
+
+    .high .score-bar { background: #10b981; }
+    .high .score-val { color: #10b981; }
+    .mid .score-bar  { background: #f59e0b; }
+    .mid .score-val  { color: #f59e0b; }
+    .low .score-bar  { background: #ef4444; }
+    .low .score-val  { color: #ef4444; }
+
+    /* ── LOADING ── */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #1b3a6b;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .loading span {
+      display: inline-block;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #aaa;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <h1>🤖 AI Resume Screener</h1>
+    <span>BERT Powered</span>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h2>Find the Best Candidates Instantly</h2>
+    <p>Upload resumes and a job description — BERT ranks candidates by semantic relevance in seconds.</p>
+  </div>
+
+  <!-- MAIN -->
+  <div class="container">
+    <div class="card">
+
+      <form method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
+
+        <!-- JD INPUT -->
+        <div class="form-section">
+          <label>📋 Job Description</label>
+          <textarea name="jd" placeholder="Paste the job description here — required skills, experience, responsibilities...">{{ jd }}</textarea>
+        </div>
+
+        <!-- UPLOAD -->
+        <div class="form-section">
+          <label>📁 Upload Resumes</label>
+          <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" name="resumes" multiple accept=".pdf,.docx" onchange="showFiles(this)"/>
+            <div class="upload-icon">📂</div>
+            <p><strong>Click to upload</strong> or drag & drop</p>
+            <p>Supports PDF and DOCX — multiple files allowed</p>
+          </div>
+
+          <!-- FILE LIST -->
+          <div id="file-list">
+            <p>✅ Files Selected:</p>
+            <ul id="file-names"></ul>
+          </div>
+        </div>
+
+        <!-- LOADING -->
+        <div class="loading" id="loading">
+          <span>⚙️ BERT is processing your resumes — please wait...</span>
+        </div>
+
+        <!-- SUBMIT -->
+        <button class="btn" type="submit">⚡ Screen Candidates</button>
+
+      </form>
+
+      <!-- RESULTS -->
+      {% if results %}
+      <div class="divider">
+        <hr/><span>Results</span><hr/>
+      </div>
+
+      <div class="results-header">
+        <h3>🏆 Ranked Candidates</h3>
+        <span class="results-count">{{ results|length }} candidate{{ 's' if results|length != 1 }}</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Candidate</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in results %}
+          {% set cls = 'high' if r.score >= 0.75 else 'mid' if r.score >= 0.5 else 'low' %}
+          {% set pct = (r.score * 100)|round|int %}
+          <tr class="{{ cls }}">
+            <td>
+              <span class="rank {% if loop.index == 1 %}rank-1{% elif loop.index == 2 %}rank-2{% elif loop.index == 3 %}rank-3{% endif %}">
+                {{ loop.index }}
+              </span>
+            </td>
+            <td>{{ r.name }}</td>
+            <td>
+              <div class="score-cell">
+                <div class="score-bar-bg">
+                  <div class="score-bar" style="width: {{ pct }}%"></div>
+                </div>
+                <span class="score-val">{{ r.score }}</span>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <footer>
+    AI-Powered Resume Screening System using BERT &nbsp;|&nbsp; 21CSP302L Minor Project &nbsp;|&nbsp; SRM IST
+  </footer>
+
+  <script>
+    // Show selected file names
+    function showFiles(input) {
+      const list = document.getElementById('file-list');
+      const names = document.getElementById('file-names');
+      names.innerHTML = '';
+      if (input.files.length > 0) {
+        list.style.display = 'block';
+        Array.from(input.files).forEach((file, i) => {
+          const li = document.createElement('li');
+          li.innerHTML = '📄 ' + file.name +
+            '<span>' + (file.size / 1024).toFixed(1) + ' KB</span>';
+          names.appendChild(li);
+        });
+        // Update upload zone text
+        document.querySelector('.upload-zone p:first-of-type').innerHTML =
+          '<strong>' + input.files.length + ' file(s) selected</strong>';
+      } else {
+        list.style.display = 'none';
+      }
+    }
+
+    // Show loading message on submit
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
